@@ -41,6 +41,22 @@ def login():
             return "Invalid credentials"
     return render_template('EMP_login.html')
 
+@app.route('/ADM_login',methods=['GET','POST'])
+def a_login():
+    if request.method =='POST':
+        email = request.form['email']
+        password_in = request.form['password']
+
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM ADMIN WHERE email=%s",(email,))
+        user = cursor.fetchone()
+
+        if user and bcrypt.check_password_hash(user[2],password_in):
+            return redirect('/homeadmin')
+        else:
+            return "Invalid credentials"
+    return render_template('ADM_login.html')
+
 @app.route('/EMP_register',methods=['GET','POST'])
 def register():
     if request.method =='POST':
@@ -52,6 +68,18 @@ def register():
         db.commit()
         return redirect('/EMP_login')
     return render_template('EMP_Register.html')
+
+@app.route('/ADM_register',methods=['GET','POST'])
+def a_register():
+    if request.method =='POST':
+        email = request.form['email']
+        password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
+
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO ADMIN (email, password) VALUES (%s, %s)", (email, password))
+        db.commit()
+        return redirect('/ADM_login')
+    return render_template('ADM_Register.html')
     
 
 
